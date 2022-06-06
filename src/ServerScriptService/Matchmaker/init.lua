@@ -143,7 +143,7 @@ function RequestTeleportationToReservedServer(gameMode : string, results : {[str
 	local ReservedServerCode = TeleportService:ReserveServer(MAP_PLACE_ID)
 
 	local success, err = protectedCall(function()
-		return MessagingService:PublishAsync(STRING_TEMPLATE..gameMode, {gameMode, gameMode, ReservedServerCode, results})
+		return MessagingService:PublishAsync(STRING_TEMPLATE..gameMode, {gameMode, ReservedServerCode, results})
 	end)
 
 	return success, err
@@ -153,9 +153,8 @@ end
 function HandleTeleportationRequest(message : any)
 	local data = message.Data
 	local gameMode = data[1]
-	local gameMode = data[2]
-	local serverAccessCode = data[3]
-	local request = data[4]
+	local serverAccessCode = data[2]
+	local request = data[3]
 	local plrsToTeleport = {}
 	
 	for _, packet in request do
@@ -169,7 +168,7 @@ function HandleTeleportationRequest(message : any)
 	end
 	
 	if #plrsToTeleport > 0 then 
-		TeleportService:TeleportToPrivateServer(MAP_PLACE_ID, serverAccessCode, plrsToTeleport, nil, {gameMode, gameMode})
+		TeleportService:TeleportToPrivateServer(MAP_PLACE_ID, serverAccessCode, plrsToTeleport, nil, {gameMode})
 	end
 end
 
