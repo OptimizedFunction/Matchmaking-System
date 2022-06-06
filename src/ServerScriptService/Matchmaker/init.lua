@@ -62,11 +62,11 @@ end
 
 
 function module.MatchPlayers(gameMode : string, minNumOfPlayers : number, maxNumOfPlayers : number)
-	local success, results = PullPlayersFromMap(string, minNumOfPlayers, maxNumOfPlayers)
+	local success, results = PullPlayersFromMap(gameMode, minNumOfPlayers, maxNumOfPlayers)
 	if not success then return end
-	local success = RemovePulledPlayersFromMap(string, results)
+	local success = RemovePulledPlayersFromMap(gameMode, results)
 	if not success then return end
-	success = RequestTeleportationToReservedServer(string, results)
+	success = RequestTeleportationToReservedServer(gameMode, results)
 	if not success then return end
 end
 
