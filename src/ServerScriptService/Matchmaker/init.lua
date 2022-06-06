@@ -107,6 +107,10 @@ function module.GetQueueSize(gameMode : string) : number
 	end
 end
 
+function module.TeleportToReservedServer(plr : Player, placeID : number, jobID : string)
+	TeleportService:TeleportToPlaceInstance(placeID, jobID, plr)
+end
+
 --internal module functions
 function PullPlayersFromMap(gameMode : string, minNumOfPlayers : number, maxNumOfPLayers ) : (boolean, {[string] : {any}}?)
 	local MatchmakingMap : MemoryStoreSortedMap = MemoryStoreService:GetSortedMap(STRING_TEMPLATE..gameMode)
