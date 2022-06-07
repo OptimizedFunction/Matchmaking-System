@@ -3,7 +3,7 @@ local MemoryStoreService = game:GetService("MemoryStoreService")
 local MessagingService = game:GetService("MessagingService")
 local sorted_map = MemoryStoreService:GetSortedMap("Servers")
 
-local gameModeList = require()
+--local gameModeList = require()
 
 local MAX_RETRIES = 3
 
@@ -13,27 +13,29 @@ function serverObj.Initialise(gamemode : string, accessCode : string)
     serverObj._JobId = game.JobId
     serverObj._ServerId = string.split(serverObj._JobId, "-")[1]
     serverObj._Gamemode = gamemode
-    serverObj._PlayerCount = 0
+    serverObj._PlayerCount = #game:GetService("Players"):GetPlayers()
     serverObj._AccessCode = accessCode
 
 
-    Players.PlayerAdded:Connect(function()
-        serverObj._PlayerCount += 1
+    serverObj._PlrAddedConnection = Players.PlayerAdded:Connect(function()
+        serverObj._PlayerCount = #game:GetService("Players"):GetPlayers()
         serverObj:PublishToList()
     end)
 
-    Players.PlayerRemoving:Connect(function()
-        serverObj._PlayerCount -= 1
+    serverObj._PlrRemovingConnection = Players.PlayerRemoving:Connect(function()
+        serverObj._PlayerCount = #game:GetService("Players"):GetPlayers()
         serverObj:PublishToList()
     end)
 
     MessagingService:SubscribeAsync(accessCode, function()
-        local bool = if serverObj._PlayerCount+1 >= gameModeList.GetMaxPlrCount(gamemode) then true else false
+        --local bool = if serverObj._PlayerCount+1 >= gameModeList.GetMaxPlrCount(gamemode) then true else false
+        local bool = if serverObj._PlayerCount+1 >= 1 then true else false
         protectedCall(function()
             MessagingService:PublishAsync(accessCode, bool)
         end)
     end)
-    
+
+    serverObj:PublishToList()
 end
 
 function serverObj:GetPlayerCount() : number
@@ -58,11 +60,17 @@ Currently, the system simply ignores the failure and retries the next cycle.
 ]]
 function serverObj:PublishToList() : (boolean, any?)
     local success, err = protectedCall(function()
-        sorted_map:SetAsync(serverObj:GetAccessCode(), {serverObj:GetServerId(), serverObj:GetGamemode(), serverObj:GetPlayerCount()})
+        sorted_map:SetAsync(serverObj:GetAccessCode(), {serverObj:GetServerId(), serverObj:GetGamemode(), serverObj:GetPlayerCount(), serverObj:GetAccessCode()}, 3600)
     end)
     return success, err
 end
 
+function serverObj.Destroy()
+    sorted_map:RemoveAsync(serverObj:GetAccessCode())
+    serverObj._PlrAddedConnection:Disconnect()
+    serverObj._PlrRemovingConnection:Disconnect()
+    serverObj = nil
+end
 
 function protectedCall(func, ...) : (boolean, any?)
 	local success, results, retries = false, nil, 0
@@ -76,5 +84,7 @@ function protectedCall(func, ...) : (boolean, any?)
 	if not success then warn(results) end
 	return success, results
 end
+
+game:BindToClose(serverObj.Destroy)
 
 return serverObj

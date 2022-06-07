@@ -63,12 +63,14 @@ end
 
 
 function module.MatchPlayers(gameMode : string, minNumOfPlayers : number, maxNumOfPlayers : number)
-	local success, results = PullPlayersFromMap(gameMode, minNumOfPlayers, maxNumOfPlayers)
-	if not success then return end
-	local success = RemovePulledPlayersFromMap(gameMode, results)
-	if not success then return end
-	success = RequestTeleportationToReservedServer(gameMode, results)
-	if not success then return end
+	while true do
+		local success, results = PullPlayersFromMap(gameMode, minNumOfPlayers, maxNumOfPlayers)
+		if not success then return end
+		local success = RemovePulledPlayersFromMap(gameMode, results)
+		if not success then return end
+		success = RequestTeleportationToReservedServer(gameMode, results)
+		if not success then return end
+	end
 end
 
 
@@ -120,7 +122,9 @@ function PullPlayersFromMap(gameMode : string, minNumOfPlayers : number, maxNumO
 		return MatchmakingMap:GetRangeAsync(Enum.SortDirection.Descending, maxNumOfPLayers)
 	end)
 
-	if results and #results < minNumOfPlayers then return false, nil end
+	if results and #results < minNumOfPlayers then 
+		print("Nop.", results, #results)
+		return false, nil end
 
 	return success, results
 end
@@ -201,7 +205,7 @@ end
 
 Players.PlayerRemoving:Connect(function(plr)
 	for _,gameMode in GameModesList do
-		module.CancelMatchmaking(plr, gameMode)
+		module.RemovePlayerFromQueue(plr, gameMode)
 	end
 	
 end)

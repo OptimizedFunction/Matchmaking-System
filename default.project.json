@@ -11,6 +11,11 @@
       "$className": "StarterGui",
       "$ignoreUnknownInstances": true,
       "$path": "src/StarterGui"
+    },
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "$ignoreUnknownInstances": true,
+      "$path": "src/ReplicatedStorage"
     }
   }
 }

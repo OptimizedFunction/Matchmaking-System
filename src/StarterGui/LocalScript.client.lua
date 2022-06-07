@@ -1,8 +1,9 @@
 local plr = game:GetService("Players").LocalPlayer
 local gui = plr.PlayerGui.MatchmakerGUI
+local ServerList = require(game:GetService("ReplicatedStorage").Matchmaker.ServerList)
 	
 gui.TextButton.MouseButton1Click:Connect(function()
-	local queued = game:GetService("ReplicatedStorage").PushRemote:InvokeServer(0)
+	local queued = game:GetService("ReplicatedStorage").PushRemote:InvokeServer("")
 	if not queued then  
 		gui.TextLabel.Text = "Not Queued!"
 	else
