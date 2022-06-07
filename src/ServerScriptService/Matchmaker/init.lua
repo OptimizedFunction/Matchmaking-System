@@ -3,6 +3,7 @@
 local MemoryStoreService : MemoryStoreService = game:GetService("MemoryStoreService")
 local TeleportService : TeleportService = game:GetService("TeleportService")
 local MessagingService : MessagingService = game:GetService("MessagingService")
+local DataStore = game:GetService("DataStoreService"):GetDataStore("TeleportData")
 local Players : Players = game:GetService("Players")
 
 --Getting dependencies
@@ -107,8 +108,8 @@ function module.GetQueueSize(gameMode : string) : number
 	end
 end
 
-function module.TeleportToReservedServer(plr : Player, placeID : number, jobID : string)
-	TeleportService:TeleportToPlaceInstance(placeID, jobID, plr)
+function module.TeleportToReservedServer(plr : Player, placeID : number, AccessCode : string)
+	TeleportService:TeleportToPrivateServer(placeID, AccessCode, {plr})
 end
 
 --internal module functions
@@ -164,15 +165,22 @@ function HandleTeleportationRequest(message : any)
 	for _, packet in request do
 		local plrID = packet["key"]
 		local jobID = packet["value"][1]
-		if game.JobId == jobID then 
+		if game.JobId == jobID then
 			for _, plr in Players:GetPlayers() do
-				if (plr::Player).UserId == tonumber(plrID) then table.insert(plrsToTeleport, plr) end
+				if (plr::Player).UserId == tonumber(plrID) then
+					table.insert(plrsToTeleport, plr)
+
+					protectedCall(function()
+						DataStore:SetAsync(tostring(plr.UserId), {gameMode, serverAccessCode})
+					end)
+
+				end
 			end
 		end
 	end
 	
 	if #plrsToTeleport > 0 then 
-		TeleportService:TeleportToPrivateServer(MAP_PLACE_ID, serverAccessCode, plrsToTeleport, nil, {gameMode})
+		TeleportService:TeleportToPrivateServer(MAP_PLACE_ID, serverAccessCode, plrsToTeleport, nil)
 	end
 end
 
@@ -200,6 +208,7 @@ end)
 
 TeleportService.TeleportInitFailed:Connect(function(plr : Instance)
 	StatusTracker[(plr::Player).UserId] = false
+	--other error handling
 end)
 
 return module
