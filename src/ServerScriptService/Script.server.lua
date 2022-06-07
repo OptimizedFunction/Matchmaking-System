@@ -42,8 +42,8 @@ game:GetService("Players").PlayerAdded:Connect(function(plr : Player)
 end)
 
 while true do
-	task.wait(8)
 	matchmaker.MatchPlayers("", 1, 10)
 	ServerList.UpdateLocalList()
 	ServerList.UpdateUI()
+	task.wait(8)
 end

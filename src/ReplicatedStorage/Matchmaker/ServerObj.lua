@@ -1,3 +1,5 @@
+--!nocheck
+
 local Players = game:GetService("Players")
 local MemoryStoreService = game:GetService("MemoryStoreService")
 local MessagingService = game:GetService("MessagingService")
@@ -16,12 +18,14 @@ function serverObj.Initialise(gamemode : string, accessCode : string)
     serverObj._PlayerCount = #game:GetService("Players"):GetPlayers()
     serverObj._AccessCode = accessCode
 
-
+    if serverObj._PlrAddedConnection then serverObj._PlrAddedConnection:Disconnect() end
     serverObj._PlrAddedConnection = Players.PlayerAdded:Connect(function()
         serverObj._PlayerCount = #game:GetService("Players"):GetPlayers()
         serverObj:PublishToList()
     end)
 
+
+    if serverObj._PlrRemovingConnection then serverObj._PlrRemovingConnection:Disconnect() end
     serverObj._PlrRemovingConnection = Players.PlayerRemoving:Connect(function()
         serverObj._PlayerCount = #game:GetService("Players"):GetPlayers()
         serverObj:PublishToList()
@@ -67,8 +71,8 @@ end
 
 function serverObj.Destroy()
     sorted_map:RemoveAsync(serverObj:GetAccessCode())
-    serverObj._PlrAddedConnection:Disconnect()
-    serverObj._PlrRemovingConnection:Disconnect()
+    if serverObj._PlrAddedConnection then serverObj._PlrAddedConnection:Disconnect() end
+    if serverObj._PlrRemovingConnection then serverObj._PlrRemovingConnection:Disconnect() end
     serverObj = nil
 end
 
