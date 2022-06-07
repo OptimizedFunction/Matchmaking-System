@@ -14,7 +14,7 @@ local IsClient = run_service:IsClient()
 
 local ELEMENT_TEMPLATE = script.Template
 local MAP_PLACE_ID = game.PlaceId
-local LIST_LAYOUT_TEMPLATE = game:GetService("ReplicatedStorage").Matchmaker.UIListLayout
+local LIST_LAYOUT_TEMPLATE = script.UIListLayout
 local MAX_RETRIES = 3
 
 local module = {}
